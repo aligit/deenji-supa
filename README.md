@@ -86,3 +86,9 @@ WARN: no files matched pattern: supabase/seed.sql
 Restarting containers...
 Finished supabase db reset on branch master.
 This drops the existing database, recreates it, and applies all migrations in `sup
+
+# Backup schema
+
+```sh
+pg_dump "postgresql://postgres:postgres@127.0.0.1:54322/postgres" --schema-only > deenji_schema.sql
+```
