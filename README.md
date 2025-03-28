@@ -92,3 +92,60 @@ This drops the existing database, recreates it, and applies all migrations in `s
 ```sh
 pg_dump "postgresql://postgres:postgres@127.0.0.1:54322/postgres" --schema-only > deenji_schema.sql
 ```
+
+# Elasticsearch
+
+## List all indices
+
+```sh
+curl -X GET "http://localhost:9200/_cat/indices?v"
+```
+
+## Check a specific index (replace "properties" with your index name)
+
+```sh
+curl -X GET "http://localhost:9200/properties?pretty"
+```
+
+## Count in Elasticsearch
+
+```sh
+curl -X GET "http://[your-elasticsearch-host]:9200/properties/_count?pretty"
+```
+
+## Count in PostgreSQL (run in Supabase SQL Editor)
+
+SELECT COUNT(\*) FROM properties;
+
+## Search by location (using geo query)
+
+```sh
+curl -X GET "http://[your-elasticsearch-host]:9200/properties/_search?pretty" -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "geo_distance": {
+      "distance": "5km",
+      "location": {
+        "lat": 35.7219,
+        "lon": 51.3347
+      }
+    }
+  }
+}
+'
+```
+
+## Search by full text
+
+```sh
+curl -X GET "http://[your-elasticsearch-host]:9200/properties/_search?pretty" -H 'Content-Type: application/json' -d'
+{
+  "query": {
+    "multi_match": {
+      "query": "آپارتمان",
+      "fields": ["title", "description", "district"]
+    }
+  }
+}
+'
+```
