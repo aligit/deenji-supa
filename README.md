@@ -197,17 +197,31 @@ Option 1: Minimal CREATE TABLE statements only
 
 bash
 
-# Minimal table dump - just CREATE TABLE statements
+## Only table names and columns
 
+```sh
+docker exec supabase_db_deenji-supabase psql -U postgres -d postgres -t -c "
+SELECT table_name || '(' ||
+  string_agg(column_name || ' ' || data_type, ', ' ORDER BY ordinal_position) || ')'
+FROM information_schema.columns
+WHERE table_schema = 'public'
+GROUP BY table_name
+ORDER BY table_name;" > minimal_tables.sql
+```
+
+## Minimal table dump - just CREATE TABLE statements
+
+```sh
 docker exec supabase_db_deenji-supabase pg_dump -U postgres \
  -s -n public --no-owner --no-privileges --no-comments \
  postgres > minimal_tables.sql
+```
 
 Option 2: Complete public schema with all objects
 
 bash
 
-# Complete schema dump including tables, indexes, constraints, etc.
+## Complete schema dump including tables, indexes, constraints, etc.
 
 docker exec supabase_db_deenji-supabase pg_dump -U postgres \
  -n public -s postgres > complete_public_schema.sql
@@ -216,7 +230,7 @@ Option 3: Full database schema (all schemas)
 
 bash
 
-# Complete database schema including auth, storage, etc.
+## Complete database schema including auth, storage, etc.
 
 docker exec supabase_db_deenji-supabase pg_dump -U postgres \
  -s postgres > full_database_schema.sql
