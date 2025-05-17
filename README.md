@@ -241,6 +241,7 @@ bash
 
 # Connect to the database interactively
 
+```sh
 docker exec -it supabase_db_deenji-supabase psql -U postgres postgres
 
 # Once connected, use these commands:
@@ -254,8 +255,56 @@ docker exec -it supabase_db_deenji-supabase psql -U postgres postgres
 # \dn # List all schemas
 
 # \l # List all databases
+```
 
-Working with Elasticsearch
+## Update real estate properties
+
+When crawling divar the type remains NULL. Use the following function to fix that:
+
+```sql
+UPDATE public.properties
+SET type =
+    CASE
+        -- 1. Check for VILA
+        WHEN title ILIKE '%ویلا%' OR description ILIKE '%ویلا%' OR
+             title ILIKE '%ویلایی%' OR description ILIKE '%ویلایی%'
+            THEN 'vila'
+
+        -- 2. Check for APARTMENT (if not already classified as vila)
+        WHEN title ILIKE '%آپارتمان%' OR description ILIKE '%آپارتمان%' OR
+             title ILIKE '%اپارتمان%' OR description ILIKE '%اپارتمان%' OR -- Common typo/alternative
+             title ILIKE '%برج%' OR description ILIKE '%برج%' OR
+             title ILIKE '%مجتمع مسکونی%' OR description ILIKE '%مجتمع مسکونی%' OR
+             ( (title ILIKE '%واحد%' OR description ILIKE '%واحد%') AND -- "واحد" is a strong indicator for apartment
+               NOT (title ILIKE '%ویلا%' OR description ILIKE '%ویلا%') AND -- but ensure it's not a "واحد ویلایی"
+               NOT (title ILIKE '%زمین%' OR description ILIKE '%زمین%') -- and not "واحد زمین" (less likely)
+             )
+            THEN 'apartment'
+
+        -- 3. Check for LAND (if not already classified as vila or apartment)
+        WHEN title ILIKE '%زمین%' OR description ILIKE '%زمین%' OR
+             title ILIKE '%قطعه زمین%' OR description ILIKE '%قطعه زمین%' OR
+             title ILIKE '%قطعه%' OR description ILIKE '%قطعه%' OR -- Often used with زمین
+             ( (title ILIKE '%باغ%' OR description ILIKE '%باغ%') AND
+               NOT (title ILIKE '%ویلا%' OR description ILIKE '%ویلا%') AND
+               NOT (title ILIKE '%آپارتمان%' OR description ILIKE '%آپارتمان%') AND
+               NOT (title ILIKE '%اپارتمان%' OR description ILIKE '%اپارتمان%')
+             ) OR
+             ( (title ILIKE '%باغچه%' OR description ILIKE '%باغچه%') AND
+               NOT (title ILIKE '%ویلا%' OR description ILIKE '%ویلا%') AND
+               NOT (title ILIKE '%آپارتمان%' OR description ILIKE '%آپارتمان%') AND
+               NOT (title ILIKE '%اپارتمان%' OR description ILIKE '%اپارتمان%')
+             )
+            THEN 'land'
+
+        -- If none of the above, keep it NULL (or set to 'unknown' if you prefer)
+        ELSE NULL
+    END
+WHERE type IS NULL; -- Only update rows where type is currently NULL
+```
+
+# Working with Elasticsearch
+
 List All Indices
 
 sh
