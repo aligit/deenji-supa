@@ -206,7 +206,7 @@ SELECT table_name || '(' ||
 FROM information_schema.columns
 WHERE table_schema = 'public'
 GROUP BY table_name
-ORDER BY table_name;" > minimal_tables.sql
+ORDER BY table_name;" > only_table_and_column.sql
 ```
 
 ## Minimal table dump - just CREATE TABLE statements
@@ -309,35 +309,34 @@ List All Indices
 
 sh
 
+````sh
 curl -X GET "http://localhost:9200/\_cat/indices?v"
 
 Check a Specific Index
 
 Replace properties with your index name:
 
-sh
-
-curl -X GET "http://localhost:9200/properties?pretty"
+```sh
+curl -X GET "http://localhost:9200/divar_properties?pretty"
 
 Count Documents in Elasticsearch
 
-sh
-
-curl -X GET "http://localhost:9200/properties/\_count?pretty"
+```sh
+curl -X GET "http://localhost:9200/divar_properties/\_count?pretty"
+````
 
 Count Records in PostgreSQL
 
 Run in Supabase SQL Editor:
 
-sql
-
+```sql
 SELECT COUNT(\*) FROM properties;
+```
 
 Geospatial Search (within 5km radius)
 
-sh
-
-curl -X GET "http://localhost:9200/properties/\_search?pretty" -H 'Content-Type: application/json' -d'
+```sh
+curl -X GET "http://localhost:9200/divar_properties/\_search?pretty" -H 'Content-Type: application/json' -d'
 {
 "query": {
 "geo_distance": {
@@ -349,13 +348,15 @@ curl -X GET "http://localhost:9200/properties/\_search?pretty" -H 'Content-Type:
 }
 }
 }
+```
+
 '
 
 Full-Text Search
 
 sh
 
-curl -X GET "http://localhost:9200/properties/\_search?pretty" -H 'Content-Type: application/json' -d'
+curl -X GET "http://localhost:9200/divar_properties/\_search?pretty" -H 'Content-Type: application/json' -d'
 {
 "query": {
 "multi_match": {
