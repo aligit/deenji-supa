@@ -15,24 +15,12 @@ This guide outlines the steps to successfully migrate a local Supabase database 
 
    ```bash
    # Export roles and schema separately
-   pg_dump --dbname "postgresql://postgres:postgres@localhost:54322/postgres" \
-     --schema-only \
-     --no-owner \
-     --roles-only \
-     > roles.sql
+   npx supabase db dump --db-url "postgresql://postgres:postgres@localhost:54322/postgres" -f roles.sql --role-only
 
-   pg_dump --dbname "postgresql://postgres:postgres@localhost:54322/postgres" \
-     --schema-only \
-     --no-owner \
-     --no-privileges \
-     > schema.sql
+   npx supabase db dump --db-url "postgresql://postgres:postgres@localhost:54322/postgres"  -f schema.sql
 
    # Export data only
-   pg_dump --dbname "postgresql://postgres:postgres@localhost:54322/postgres" \
-     --data-only \
-     --no-owner \
-     --no-privileges \
-     > data.sql
+   npx supabase db dump --db-url "postgresql://postgres:postgres@localhost:54322/postgres" --data-only --use-copy -f data.sql
    ```
 
 2. **Clean up the schema and data files**:
